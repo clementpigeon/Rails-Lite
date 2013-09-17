@@ -11,14 +11,19 @@ class Route
   def matches?(req)
     @pattern.match(req.path) &&
     @http_method == req.request_method.downcase.to_sym
-# (http_method == req.request_method.downcase.to_sym) && (pattern =~ req.path)
   end
 
   def run(req, res)
+    match_data = @pattern.match(req.path)
 
+    route_params = {}
+    match_data.names.each do |name|
+      route_params[name] = match_data[name]
+    end
 
-    controller = @controller_class.new(req, res)
-    controller.invoke_action(@action_name)
+    @controller_class
+      .new(req, res, route_params)
+      .invoke_action(action_name)
   end
 end
 
